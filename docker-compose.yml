@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    container_name: nest_dev_app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: development
+      RUNNING_IN_DOCKER: true
+    command: sh -c "npm install && npm run build:seeders && npx migrate-mongo up && npm run seeders:up && npm run start:dev"
+
+  mongo:
+    image: mongo:6.0
+    container_name: nest_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

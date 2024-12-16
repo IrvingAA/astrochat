@@ -1,0 +1,19 @@
+{
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.validate": ["javascript", "typescript"],
+    "prettier.requireConfig": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "eslint.format.enable": true,
+    "files.autoSave": "onFocusChange",
+    "typescript.validate.enable": true,
+    "javascript.validate.enable": true,
+    "eslint.alwaysShowStatus": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}  
