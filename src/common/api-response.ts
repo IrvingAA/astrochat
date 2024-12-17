@@ -16,8 +16,55 @@ export enum AlertEnum {
 }
 
 /**
+ * Parámetros estándar de paginación con búsqueda y soporte para campos adicionales.
+ * @property {number} page - Página actual
+ * @property {number} limit - Cantidad de elementos por página
+ * @property {string} search - Texto de búsqueda
+ * @property {string} [key] - Campos adicionales
+ */
+export interface StandardParamsPagination {
+  page: number | string
+  limit: number | string
+  search?: string
+  [key: string]: any
+}
+
+/**
+ * Estándar de paginación de la API
+ * @typeParam T Tipo de dato que se espera en la respuesta
+ */
+export class StandardPagination<T> {
+  items: T
+  pagination: {
+    currentPage: number
+    perPage: number
+    totalItems: number
+    totalPages: number
+  }
+
+  constructor(items: T, page: number, perPage: number, totalItems: number) {
+    this.items = items
+    this.pagination = {
+      currentPage: page,
+      perPage: perPage,
+      totalItems: totalItems,
+      totalPages: Math.ceil(totalItems / perPage)
+    }
+  }
+}
+/**
  * Estándar de respuesta de la API
  * @typeParam T Tipo de dato que se espera en la respuesta
+ * @property {HttpEnum} httpCode - Código HTTP de la respuesta
+ * @property {string} message - Mensaje de la respuesta
+ * @property {AlertEnum} alert - Tipo de alerta de la respuesta
+ * @property {T | T[] | null} data - Datos a devolver
+ * @property {string} dateTime - Fecha y hora de la respuesta
+ * @property {function} filterFields - Filtra los campos de los datos a devolver
+ * @property {function} isStandardPagination - Verifica si los datos son de paginación estándar
+ * @property {function} applyFilterToItems - Aplica el filtro a los elementos de la paginación
+ * @property {function} pickFields - Selecciona los campos a devolver
+ * @property {function} getNestedValue - Obtiene el valor de un campo anidado
  */
 export class ApiResponse<T> {
   public httpCode: HttpEnum
@@ -40,7 +87,7 @@ export class ApiResponse<T> {
     alert: AlertEnum,
     data: T | T[] | null,
     fields?: string[],
-    dateTime: string = format(new Date(), 'dd-MM-yyyy hh:mm:ss a')
+    dateTime: string = format(new Date(), 'dd-MM-yyyy HH:mm:ss ')
   ) {
     this.httpCode = httpCode
     this.message = message
@@ -49,37 +96,74 @@ export class ApiResponse<T> {
     this.data = this.filterFields(data, fields)
   }
 
+  /**
+   * Filtra los campos de los datos a devolver
+   * @param data Datos a filtrar
+   * @param fields Lista de campos a filtrar. Permite notación con puntos para campos anidados (e.g. "profile.name").
+   * @returns
+   */
   private filterFields(
     data: T | T[] | null,
     fields?: string[]
   ): T | T[] | null {
     if (!data) return null
     if (!fields || fields.length === 0) return data
-    if (Array.isArray(data)) {
-      return data.map((item) => this.pickFields(item, fields)) as T[]
-    }
-    return this.pickFields(data, fields)
+
+    return this.isStandardPagination(data)
+      ? {
+          items: this.applyFilterToItems(data.items, fields),
+          pagination: data.pagination
+        }
+      : Array.isArray(data)
+        ? (data.map((item) => this.pickFields(item, fields)) as T[])
+        : this.pickFields(data, fields)
   }
 
+  /**
+   * Verifica si los datos son de paginación estándar
+   * @param data
+   * @returns
+   */
+  private isStandardPagination(data: any): data is StandardPagination<any> {
+    return data && data.items !== undefined && data.pagination !== undefined
+  }
+
+  /**
+   * Aplica el filtro a los elementos de la paginación
+   * @param {items} items
+   * @param {fields} fields
+   * @returns
+   */
+  private applyFilterToItems(items: any[], fields: string[]): any[] {
+    return items.map((item) => this.pickFields(item, fields))
+  }
+
+  /**
+   * Selecciona los campos a devolver
+   * @param {obj} obj
+   * @param {fields} fields
+   * @returns
+   */
   private pickFields(obj: any, fields: string[]): any {
     const filtered: any = {}
     for (const field of fields) {
       const parts = field.split('.')
       const value = this.getNestedValue(obj, parts)
-      if (value !== undefined) {
-        const newKey = parts.join('_')
-        filtered[newKey] = value
-      }
+      if (value !== undefined) filtered[parts.join('_')] = value
     }
     return filtered
   }
 
+  /**
+   * Obtiene el valor de un campo anidado
+   * @param {obj} obj
+   * @param {parts} parts
+   * @returns
+   */
   private getNestedValue(obj: any, parts: string[]): any {
     let current = obj
     for (const part of parts) {
-      if (current == null || current[part] === undefined) {
-        return undefined
-      }
+      if (current == null || current[part] === undefined) return undefined
       current = current[part]
     }
     return current

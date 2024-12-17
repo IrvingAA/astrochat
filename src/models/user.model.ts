@@ -1,6 +1,23 @@
 import mongoose, { Schema, Document, Model, model } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
-
+/**
+ * User Interface
+ * @interface IUser
+ * @extends {Document}
+ * @property {string} uuid
+ * @property {string} username
+ * @property {string} name
+ * @property {string} lastName
+ * @property {(string | null)} email
+ * @property {string} password
+ * @property {mongoose.Types.ObjectId} profile
+ * @property {string} avatar
+ * @property {boolean} isActive
+ * @property {Date} createdAt
+ * @property {Date} updatedAt
+ * @property {(Date | null)} deletedAt
+ * @property {string} fullName
+ */
 export interface IUser extends Document {
   uuid: string
   username: string
@@ -16,7 +33,12 @@ export interface IUser extends Document {
   deletedAt?: Date | null
   fullName?: string
 }
-
+/**
+ * User Schema
+ * @type {Schema}
+ * @argument {IUser}
+ *
+ */
 export const UserSchema = new Schema<IUser>(
   {
     uuid: { type: String, default: uuidv4 },

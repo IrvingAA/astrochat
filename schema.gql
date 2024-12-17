@@ -1,0 +1,39 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+directive @upper on FIELD_DEFINITION
+
+type GraphQLMessage {
+  id: String!
+  content: String!
+  chatRoomUuid: String!
+  senderUuid: String
+  recipientUuid: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type GraphQLPaginationMeta {
+  currentPage: Int!
+  perPage: Int!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+type GraphQLMessagePagination {
+  items: [GraphQLMessage!]!
+  pagination: GraphQLPaginationMeta!
+}
+
+type Query {
+  messagesByChatRoom(chatRoomUuid: String!, page: Float! = 1, limit: Float! = 10): GraphQLMessagePagination!
+}
+
+type Mutation {
+  addMessage(message: String!): String!
+}
+
+type Subscription {
+  newMessage: String!
+}

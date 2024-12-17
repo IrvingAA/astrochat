@@ -24,6 +24,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/graphql/**/*.ts"],
   "exclude": ["node_modules", "test/**/*", "dist/**/*"]
 }

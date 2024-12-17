@@ -1,22 +1,18 @@
-FROM node:18-alpine
-
-# Instalar herramientas para compilar módulos nativos
-RUN apk add --no-cache make gcc g++ python3
-
-# Directorio de trabajo
+# Stage 1: Base image
+FROM node:22 AS base
 WORKDIR /app
-
-# Copiar los archivos de dependencias
 COPY package*.json ./
-
-# Instalar dependencias (forzar compilación de bcrypt)
-RUN npm install --build-from-source bcrypt
-
-# Copiar todo el código fuente
+RUN npm install
 COPY . .
 
-# Exponer el puerto 3000
-EXPOSE 3000
+# Stage 2: Development
+FROM base AS development
+ENV NODE_ENV=development
+RUN npm install --only=development
+CMD ["sh", "-c", "npx ts-node src/scripts/run-seeders.ts && npm run start:dev"]
 
-# Comando por defecto
-CMD ["npm", "run", "start:dev"]
+# Stage 3: Production
+FROM base AS production
+ENV NODE_ENV=production
+RUN npm run build
+CMD ["node", "dist/main"]
