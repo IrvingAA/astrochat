@@ -15,4 +15,12 @@ export class UpdateChatRoomDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean
+
+  @IsOptional()
+  @IsString()
+  totalItems?: string
+
+  @IsOptional()
+  @IsString()
+  totalPages?: string
 }

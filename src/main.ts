@@ -5,6 +5,7 @@ import { ApiExceptionFilter } from './common/filters/api-exception.filter'
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { AllExceptionsFilter } from './filters/all-exceptions.filter'
 import { ValidationPipe } from '@nestjs/common'
+import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 
 dotenv.config()
 
@@ -14,11 +15,12 @@ async function bootstrap() {
   app.setGlobalPrefix('api', {
     exclude: ['/', 'graphql']
   })
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
   app.useGlobalFilters(
     new ApiExceptionFilter(),
     new GlobalExceptionFilter(),
-    new AllExceptionsFilter()
+    new AllExceptionsFilter(),
+    new HttpExceptionFilter()
   )
 
   app.enableCors()

@@ -7,6 +7,7 @@ module.exports = {
           required: ['uuid', 'name', 'isActive', 'createdAt', 'updatedAt'],
           properties: {
             uuid: { bsonType: 'string' },
+            icon: { bsonType: ['string', 'null'] },
             description: { bsonType: ['string', 'null'] },
             password: { bsonType: ['string', 'null'] },
             name: { bsonType: 'string' },

@@ -1,8 +1,7 @@
 import { Query, Resolver, Args, Subscription, Mutation } from '@nestjs/graphql'
 import { PubSub } from 'graphql-subscriptions'
 import { MessagesService } from './message.service'
-import { GraphQLMessagePagination, GraphQLMessage } from './message.type'
-import { CreateMessageDto } from './dto/create-message.dto'
+import { GraphQLMessagePagination } from './message.type'
 
 const pubSub = new PubSub()
 
@@ -17,55 +16,80 @@ export class MessageResolver {
   async getMessages(
     @Args('chatRoomUuid') chatRoomUuid: string,
     @Args('page', { type: () => Number, defaultValue: 1 }) page: number,
-    @Args('limit', { type: () => Number, defaultValue: 10 }) limit: number
+    @Args('limit', { type: () => Number, defaultValue: 50 }) limit: number
   ): Promise<GraphQLMessagePagination> {
+    // Llamada al servicio para obtener los mensajes paginados
     const response = await this.messagesService.findByChatRoom(
       chatRoomUuid,
       page,
       limit
     )
 
-    const publicMessages = response.data.publicMessages.items || []
-    const privateMessages = response.data.privateMessages.items || []
+    // Extraer los mensajes de la respuesta
+    const allMessages = response.data.items || []
 
-    const allMessages = [...publicMessages, ...privateMessages].map(
-      (message) => ({
+    // Cálculo de la paginación
+    const totalItems = response.data.pagination.totalItems || 0
+    const totalPages = Math.ceil(totalItems / limit)
+
+    // Devolver los mensajes junto con la paginación
+    return {
+      items: allMessages.map((message) => ({
         id: message._id?.toString() || '',
         content: message.content || '',
         chatRoomUuid: message.chatRoomUuid || '',
         senderUuid: message.senderUuid?.uuid || '',
+        avatar: message.senderUuid?.avatar || '',
         recipientUuid: message.recipientUuid?.uuid || '',
         createdAt: message.createdAt || new Date().toISOString(),
         updatedAt: message.updatedAt || new Date().toISOString()
-      })
-    )
-
-    return {
-      items: allMessages,
+      })),
       pagination: {
         currentPage: page,
         perPage: limit,
-        totalItems:
-          response.data.publicMessages.pagination.totalItems +
-          response.data.privateMessages.pagination.totalItems,
-        totalPages: Math.ceil(
-          (response.data.publicMessages.pagination.totalItems +
-            response.data.privateMessages.pagination.totalItems) /
-            limit
-        )
+        totalItems: totalItems,
+        totalPages: totalPages
       }
     }
   }
 
-  @Subscription(() => String, { name: 'newMessage' })
-  newMessage() {
-    return pubSub.asyncIterableIterator('messageAdded') // Escucha eventos publicados en "messageAdded"
+  /**
+   * Mutación: Enviar un nuevo mensaje
+   */
+  @Mutation(() => String, { name: 'addMessage' })
+  async addMessage(
+    @Args('content') content: string,
+    @Args('chatRoomUuid') chatRoomUuid: string,
+    @Args('senderUuid') senderUuid: string
+  ): Promise<string> {
+    const savedMessage: any = await this.messagesService.createMessage({
+      content,
+      chatRoomUuid,
+      senderUuid,
+      recipientUuid: null
+    })
+    console.log('savedMessage', savedMessage)
+    if (!savedMessage) {
+      throw new Error('Error guardando el mensaje')
+    }
+    const payload = {
+      message: savedMessage.data.content,
+      createdBy: savedMessage.data.senderUuid?.toString(),
+      createdAt: savedMessage.data.createdAt?.toISOString()
+    }
+    console.log('Payload:', payload)
+
+    // Publica un string (JSON.stringify)
+    pubSub.publish('messageAdded', { newMessage: JSON.stringify(payload) })
+
+    return `Mensaje enviado: ${savedMessage.data.content}`
   }
 
-  // Mutación que envía un nuevo mensaje
-  @Mutation(() => String)
-  addMessage(@Args('message') message: string): string {
-    pubSub.publish('messageAdded', { newMessage: message }) // Publica el evento
-    return message
+  /**
+   * Suscripción: Escuchar nuevos mensajes
+   */
+  @Subscription(() => String, { name: 'newMessage' })
+  newMessage() {
+    return pubSub.asyncIterableIterator('messageAdded')
   }
 }

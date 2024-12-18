@@ -7,13 +7,15 @@ import {
   Patch,
   Delete,
   Query,
-  Put
+  Put,
+  UseGuards
 } from '@nestjs/common'
 import { ChatRoomService } from './chat-room.service'
 import { CreateChatRoomDto } from './dto/create-chat-room.dto'
 import { UpdateChatRoomDto } from './dto/update-chat-room.dto'
 import { ApiResponse, StandardParamsPagination } from '@/common/api-response'
 import { IChatRoom } from '@/models/chatRoom.model'
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard'
 
 @Controller('chat-rooms')
 export class ChatRoomController {
@@ -24,6 +26,7 @@ export class ChatRoomController {
    * @param {CreateChatRoomDto} createChatRoomDto
    * @returns {Promise<ApiResponse<IChatRoom>>}
    */
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createChatRoomDto: CreateChatRoomDto) {
     return this.chatRoomService.create(createChatRoomDto)
@@ -34,6 +37,7 @@ export class ChatRoomController {
    * @param {StandardParamsPagination} queryParams
    * @returns {Promise<ApiResponse<StandardPagination<IChatRoom[]>>}
    */
+  @UseGuards(JwtAuthGuard)
   @Get()
   async index(@Query() queryParams: StandardParamsPagination) {
     const { page, limit, search, ...otherParams } = queryParams
@@ -53,6 +57,7 @@ export class ChatRoomController {
    * @param {string} uuid
    * @param {UpdateChatRoomDto} updateChatRoomDto
    */
+  @UseGuards(JwtAuthGuard)
   @Put(':uuid')
   update(
     @Param('uuid') uuid: string,
@@ -65,6 +70,7 @@ export class ChatRoomController {
    * Method to delete a chat room
    * @param {string} uuid
    */
+  @UseGuards(JwtAuthGuard)
   @Delete(':uuid')
   softDelete(
     @Param('uuid') uuid: string
@@ -76,6 +82,7 @@ export class ChatRoomController {
    * Method to deactivate or activate a chat room
    * @param {string} uuid
    */
+  @UseGuards(JwtAuthGuard)
   @Patch(':uuid/status')
   toggleActive(
     @Param('uuid') uuid: string

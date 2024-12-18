@@ -11,3 +11,12 @@ export class UserType {
   @Field(() => String, { nullable: true })
   fullName?: string
 }
+
+@ObjectType()
+export class UserLoginRequest {
+  @Field(() => String)
+  username: string
+
+  @Field(() => String)
+  password: string
+}

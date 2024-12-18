@@ -22,6 +22,9 @@ export class GraphQLMessage {
 
   @Field(() => String)
   updatedAt: string
+
+  @Field(() => String, { nullable: true })
+  avatar?: string
 }
 
 @ObjectType()

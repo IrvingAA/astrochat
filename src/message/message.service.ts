@@ -34,6 +34,7 @@ export class MessagesService {
           HttpEnum.NOT_FOUND,
           'El remitente no fue encontrado',
           AlertEnum.ERROR,
+          'Atención',
           null
         )
       }
@@ -47,6 +48,7 @@ export class MessagesService {
             HttpEnum.NOT_FOUND,
             'El destinatario no fue encontrado',
             AlertEnum.ERROR,
+            'Atención',
             null
           )
         }
@@ -71,6 +73,7 @@ export class MessagesService {
         HttpEnum.CREATED,
         'Mensaje creado correctamente',
         AlertEnum.SUCCESS,
+        'Atención',
         savedMessage
       )
     } catch (error: any) {
@@ -80,11 +83,11 @@ export class MessagesService {
         HttpEnum.BAD_REQUEST,
         `Error creando el mensaje: ${error.message}`,
         AlertEnum.ERROR,
+        'Atención',
         null
       )
     }
   }
-
   /**
    * Get paginated messages in a chat room (public and private)
    * @param {string} chatRoomUuid - UUID of the chat room
@@ -98,14 +101,16 @@ export class MessagesService {
     limit: number = 10
   ): Promise<ApiResponse<any>> {
     try {
-      const userUuid = 'b905bd9a-a158-43da-a9d6-57d630849f91'
+      const userUuid = '63530ec0-b4d0-4a4e-a6df-31c605c79af4'
 
+      // Obtener el usuario
       const user = await this.userModel.findOne({ uuid: userUuid })
       if (!user) {
         return new ApiResponse<any>(
           HttpEnum.NOT_FOUND,
           'Usuario no encontrado',
           AlertEnum.ERROR,
+          'Atención',
           []
         )
       }
@@ -113,68 +118,52 @@ export class MessagesService {
       const userId = user._id
       const skip = (page - 1) * limit
 
-      const publicMessagesQuery = this.messageModel
+      // Consulta para obtener todos los mensajes, públicos y privados, de la sala
+      const allMessagesQuery = this.messageModel
         .find({
-          chatRoomUuid,
-          recipientUuid: null,
-          deletedAt: null
+          chatRoomUuid, // Filtramos por la sala de chat
+          deletedAt: null // Excluimos los mensajes eliminados
         })
         .skip(skip)
         .limit(limit)
-        .sort({ createdAt: 1 })
-        .populate('senderUuid', 'uuid username fullName')
-        .lean()
+        .sort({ createdAt: -1 }) // Ordenamos por fecha, más recientes primero
+        .populate('senderUuid', 'uuid username name lastName fullName avatar') // Detalles del remitente
+        .populate(
+          'recipientUuid',
+          'uuid username name lastName fullName avatar'
+        ) // Detalles del destinatario (si aplica)
+        .select('uuid content senderUuid recipientUuid createdAt avatar') // Seleccionamos los campos necesarios
+        .lean() // Usamos lean() para obtener objetos planos
 
-      const privateMessagesQuery = this.messageModel
-        .find({
-          chatRoomUuid,
-          $or: [{ recipientUuid: userId }, { senderUuid: userId }],
-          deletedAt: null
-        })
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: 1 })
-        .populate('senderUuid', 'uuid username fullName')
-        .populate('recipientUuid', 'uuid username fullName')
-        .lean()
+      // Ejecutar la consulta para obtener todos los mensajes
+      const allMessages = await allMessagesQuery
 
-      const [publicMessages, privateMessages] = await Promise.all([
-        publicMessagesQuery,
-        privateMessagesQuery
-      ])
-
-      const totalPublic = await this.messageModel.countDocuments({
+      // Contamos el total de mensajes en la sala (sin distinción de público o privado)
+      const totalMessages = await this.messageModel.countDocuments({
         chatRoomUuid,
-        recipientUuid: null,
-        deletedAt: null
+        deletedAt: null // Excluimos los mensajes eliminados
       })
 
-      const totalPrivate = await this.messageModel.countDocuments({
-        chatRoomUuid,
-        $or: [{ recipientUuid: userId }, { senderUuid: userId }],
-        deletedAt: null
-      })
+      // Cálculo de la paginación
+      const totalPages = Math.ceil(totalMessages / limit) // Total de páginas
 
-      const organizedMessages = {
-        publicMessages: new StandardPagination(
-          publicMessages,
-          page,
-          limit,
-          totalPublic
-        ),
-        privateMessages: new StandardPagination(
-          privateMessages,
-          page,
-          limit,
-          totalPrivate
-        )
+      // Estructura paginada
+      const paginatedMessages = {
+        items: allMessages,
+        pagination: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalItems: totalMessages,
+          perPage: limit
+        }
       }
 
       return new ApiResponse<any>(
         HttpEnum.SUCCESS,
         'Mensajes obtenidos correctamente',
         AlertEnum.SUCCESS,
-        organizedMessages
+        'Atención',
+        paginatedMessages
       )
     } catch (error: any) {
       console.error('Error obteniendo mensajes: ', error.message)
@@ -182,6 +171,7 @@ export class MessagesService {
         HttpEnum.SERVER_ERROR,
         `Ocurrió un error al obtener los mensajes: ${error.message}`,
         AlertEnum.ERROR,
+        'Atención',
         []
       )
     }
@@ -200,6 +190,7 @@ export class MessagesService {
         HttpEnum.NOT_FOUND,
         'Mensaje no encontrado',
         AlertEnum.ERROR,
+        'Atención',
         null
       )
     }
@@ -211,6 +202,7 @@ export class MessagesService {
       HttpEnum.SUCCESS,
       'Mensaje eliminado correctamente',
       AlertEnum.SUCCESS,
+      'Atención',
       message
     )
   }

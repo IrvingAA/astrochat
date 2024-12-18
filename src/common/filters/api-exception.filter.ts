@@ -23,6 +23,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
       status as HttpEnum,
       typeof message === 'object' ? message['message'] || 'Error' : message,
       AlertEnum.ERROR,
+      'Error',
       null
     )
 

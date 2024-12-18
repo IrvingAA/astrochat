@@ -1,3 +1,5 @@
+import { IsString, IsNotEmpty, IsEmail } from 'class-validator'
+
 /**
  * Data transfer object for creating a user
  * @class
@@ -11,11 +13,29 @@
  * @property {string} profile - User's profile
  */
 export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
   username: string
+
+  @IsString()
+  @IsNotEmpty()
   name: string
+
+  @IsString()
+  @IsNotEmpty()
   lastName: string
-  email?: string
+
+  @IsString()
+  @IsEmail()
+  email: string
+
+  @IsString()
+  @IsNotEmpty()
   password: string
-  avatar?: string
-  profile?: string
+
+  @IsString()
+  avatar: string
+
+  @IsString()
+  profile: string
 }

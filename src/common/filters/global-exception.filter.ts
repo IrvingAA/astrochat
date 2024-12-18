@@ -39,6 +39,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status as HttpEnum,
       message,
       alert,
+      'Error',
       null,
       undefined,
       new Date().toISOString()

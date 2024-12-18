@@ -29,6 +29,7 @@ export class ChatRoomService {
         HttpEnum.CONFLICT,
         'La sala ya existe',
         AlertEnum.ERROR,
+        'Sala duplicada',
         null
       )
     }
@@ -40,6 +41,7 @@ export class ChatRoomService {
       HttpEnum.CREATED,
       'Sala creada con éxito',
       AlertEnum.SUCCESS,
+      'Sala creada',
       savedRoom
     )
   }
@@ -50,7 +52,7 @@ export class ChatRoomService {
     const { page, limit, search, ...otherParams } = params
 
     const parsedPage = Number(page) || 1
-    const parsedLimit = Number(limit) || 10
+    const parsedLimit = Number(limit) || 5
 
     const filter: any = search
       ? {
@@ -75,7 +77,7 @@ export class ChatRoomService {
       .find(filter)
       .skip(skip)
       .limit(parsedLimit)
-      .sort({ createdAt: -1 })
+      .sort({ name: 1 })
 
     const total = await this.chatRoomModel.countDocuments(filter)
 
@@ -90,8 +92,17 @@ export class ChatRoomService {
       HttpEnum.SUCCESS,
       'Salas obtenidas correctamente',
       AlertEnum.SUCCESS,
+      'Salas obtenidas',
       paginationResult,
-      ['uuid', 'name', 'description', 'isActive', 'createdAt']
+      [
+        'uuid',
+        'name',
+        'description',
+        'isActive',
+        'createdAt',
+        'password',
+        'icon'
+      ]
     )
   }
 
@@ -112,6 +123,7 @@ export class ChatRoomService {
         HttpEnum.NOT_FOUND,
         'Sala no encontrada',
         AlertEnum.ERROR,
+        'Sala no encontrada',
         null
       )
     }
@@ -128,6 +140,7 @@ export class ChatRoomService {
         HttpEnum.SUCCESS,
         'No se realizaron cambios',
         AlertEnum.WARNING,
+        'Atención',
         existingRoom,
         ['uuid', 'name', 'description', 'isActive', 'createdBy', 'updatedAt']
       )
@@ -140,6 +153,7 @@ export class ChatRoomService {
       HttpEnum.SUCCESS,
       'Sala actualizada correctamente',
       AlertEnum.SUCCESS,
+      'Atención',
       updatedRoom,
       ['uuid', 'name', 'description', 'isActive', 'createdBy', 'updatedAt']
     )
@@ -158,6 +172,7 @@ export class ChatRoomService {
         HttpEnum.NOT_FOUND,
         'Sala no encontrada',
         AlertEnum.ERROR,
+        'Atención',
         null
       )
     }
@@ -175,6 +190,7 @@ export class ChatRoomService {
       HttpEnum.SUCCESS,
       message,
       AlertEnum.SUCCESS,
+      'Atención',
       updatedRoom,
       ['uuid', 'name', 'description', 'isActive', 'createdBy', 'deletedAt']
     )
@@ -192,6 +208,7 @@ export class ChatRoomService {
         HttpEnum.NOT_FOUND,
         'Sala no encontrada',
         AlertEnum.ERROR,
+        'Atención',
         room,
         ['uuid', 'name', 'description', 'isActive', 'createdBy']
       )
@@ -204,6 +221,7 @@ export class ChatRoomService {
       HttpEnum.SUCCESS,
       `Sala ${room.isActive ? 'borrada' : 'restaurada'} correctamente`,
       AlertEnum.SUCCESS,
+      'Atención',
       room,
       ['uuid', 'name', 'description', 'isActive', 'createdBy', 'deletedAt']
     )

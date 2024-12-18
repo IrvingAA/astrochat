@@ -1,3 +1,4 @@
+import { Field } from '@nestjs/graphql'
 import { format } from 'date-fns'
 
 export enum HttpEnum {
@@ -10,8 +11,8 @@ export enum HttpEnum {
 }
 
 export enum AlertEnum {
-  SUCCESS = 'success',
-  ERROR = 'error',
+  SUCCESS = 'positive',
+  ERROR = 'negative',
   WARNING = 'warning'
 }
 
@@ -57,6 +58,7 @@ export class StandardPagination<T> {
  * @typeParam T Tipo de dato que se espera en la respuesta
  * @property {HttpEnum} httpCode - Código HTTP de la respuesta
  * @property {string} message - Mensaje de la respuesta
+ * @property {string} title - Titulo de la alerta
  * @property {AlertEnum} alert - Tipo de alerta de la respuesta
  * @property {T | T[] | null} data - Datos a devolver
  * @property {string} dateTime - Fecha y hora de la respuesta
@@ -69,6 +71,7 @@ export class StandardPagination<T> {
 export class ApiResponse<T> {
   public httpCode: HttpEnum
   public message: string
+  public title?: string = 'Alerta'
   public alert: AlertEnum
   public data: T | T[] | null
   public dateTime: string
@@ -80,11 +83,13 @@ export class ApiResponse<T> {
    * @param data Datos a devolver
    * @param fields Lista de campos a filtrar. Permite notación con puntos para campos anidados (e.g. "profile.name").
    * @param dateTime Fecha y hora de la respuesta, por defecto fecha actual formateada
+   * @param title Titulo de la alerta
    */
   constructor(
     httpCode: HttpEnum,
     message: string,
     alert: AlertEnum,
+    title: string,
     data: T | T[] | null,
     fields?: string[],
     dateTime: string = format(new Date(), 'dd-MM-yyyy HH:mm:ss ')
@@ -92,6 +97,7 @@ export class ApiResponse<T> {
     this.httpCode = httpCode
     this.message = message
     this.alert = alert
+    this.title = title
     this.dateTime = dateTime
     this.data = this.filterFields(data, fields)
   }
@@ -168,4 +174,18 @@ export class ApiResponse<T> {
     }
     return current
   }
+}
+
+/**
+ * Clonamos ApiResponse pero decoramos con @ObjectType de GraphQL
+ */
+export class ApiMessageResponse {
+  @Field(() => String)
+  message: string
+
+  @Field(() => String)
+  createdBy: string
+
+  @Field(() => String)
+  createdAt: string
 }

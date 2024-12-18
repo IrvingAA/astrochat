@@ -28,53 +28,60 @@ export class UsersService {
    * @returns
    */
   async create(createUserDto: CreateUserDto): Promise<ApiResponse<IUser>> {
-    const { email, username, password } = createUserDto
+    console.log('createUserDto', { createUserDto })
+    try {
+      const { email, username, password } = createUserDto
 
-    const existingUser = await this.userModel.findOne({
-      $or: [{ email }, { username }]
-    })
+      const existingUser = await this.userModel.findOne({
+        $or: [{ email }, { username }]
+      })
+      console.log('existingUser', { existingUser })
+      if (existingUser) {
+        return new ApiResponse<IUser>(
+          HttpEnum.CONFLICT,
+          'El usuario o correo ya existe',
+          AlertEnum.ERROR,
+          'El usuario o correo ya existe',
+          null
+        )
+      }
 
-    if (existingUser) {
+      const hashedPassword = await PasswordUtil.hashPassword(password)
+      const defaultProfile = await this.profileModel.findOne({
+        name: ProfileEnum.USER
+      })
+
+      const newUser = new this.userModel({
+        ...createUserDto,
+        password: hashedPassword,
+        profile: defaultProfile._id
+      })
+      console.log('newUser', { newUser })
+      const savedUser: IUser = await newUser.save()
+      const populatedUser = await this.userModel
+        .findById(savedUser._id)
+        .populate('profile')
+
       return new ApiResponse<IUser>(
-        HttpEnum.CONFLICT,
-        'El usuario o correo ya existe',
-        AlertEnum.ERROR,
-        null
+        HttpEnum.CREATED,
+        'El usuario ha sido creado con éxito',
+        AlertEnum.SUCCESS,
+        'Atención',
+        populatedUser,
+        [
+          'uuid',
+          'username',
+          'fullName',
+          'email',
+          'profile.name',
+          'createdAt',
+          'updatedAt'
+        ]
       )
+    } catch (error: any) {
+      console.error('Error al crear el usuario:', error.message, error.stack)
+      throw new Error(error)
     }
-
-    const hashedPassword = await PasswordUtil.hashPassword(password)
-    const defaultProfile = await this.profileModel.findOne({
-      name: ProfileEnum.USER
-    })
-
-    const newUser = new this.userModel({
-      ...createUserDto,
-      password: hashedPassword,
-      profile: defaultProfile._id
-    })
-
-    const savedUser = await newUser.save()
-
-    const populatedUser = await this.userModel
-      .findById(savedUser._id)
-      .populate('profile')
-
-    return new ApiResponse<IUser>(
-      HttpEnum.CREATED,
-      'El usuario ha sido creado con éxito',
-      AlertEnum.SUCCESS,
-      populatedUser,
-      [
-        'uuid',
-        'username',
-        'fullName',
-        'email',
-        'profile.name',
-        'createdAt',
-        'updatedAt'
-      ]
-    )
   }
 
   /**
@@ -125,6 +132,7 @@ export class UsersService {
       HttpEnum.SUCCESS,
       'Usuarios obtenidos correctamente',
       AlertEnum.SUCCESS,
+      'Atención',
       paginationResult,
       ['uuid', 'username', 'email', 'fullName', 'profile.name']
     )
@@ -147,6 +155,7 @@ export class UsersService {
         HttpEnum.NOT_FOUND,
         'Usuario no encontrado',
         AlertEnum.ERROR,
+        'Error',
         null
       )
     }
@@ -161,6 +170,7 @@ export class UsersService {
           HttpEnum.NOT_FOUND,
           'Perfil no encontrado',
           AlertEnum.ERROR,
+          'Error',
           null
         )
       }
@@ -178,6 +188,7 @@ export class UsersService {
         HttpEnum.SUCCESS,
         'No se realizaron cambios',
         AlertEnum.WARNING,
+        'Atención',
         existingUser,
         ['uuid', 'username', 'email', 'fullName', 'profile.name', 'updatedAt']
       )
@@ -194,6 +205,7 @@ export class UsersService {
       HttpEnum.SUCCESS,
       'Usuario actualizado correctamente',
       AlertEnum.SUCCESS,
+      'Atención',
       populatedUser,
       ['uuid', 'username', 'email', 'fullName', 'profile.name', 'updatedAt']
     )
@@ -212,6 +224,7 @@ export class UsersService {
         HttpEnum.NOT_FOUND,
         'Usuario no encontrado',
         AlertEnum.ERROR,
+        'Error',
         null
       )
     }
@@ -229,6 +242,7 @@ export class UsersService {
       HttpEnum.SUCCESS,
       message,
       AlertEnum.SUCCESS,
+      'Atención',
       updatedUser,
       ['uuid', 'username', 'email', 'fullName', 'profile.name', 'deletedAt']
     )
@@ -248,6 +262,7 @@ export class UsersService {
         HttpEnum.NOT_FOUND,
         'Usuario no encontrado',
         AlertEnum.ERROR,
+        'Error',
         null
       )
     }
@@ -264,8 +279,22 @@ export class UsersService {
       HttpEnum.SUCCESS,
       message,
       AlertEnum.SUCCESS,
+      'Atención',
       updatedUser,
       ['uuid', 'username', 'email', 'fullName', 'profile.name', 'isActive']
+    )
+  }
+
+  /**
+   * Validate token
+   */
+  async validateToken() {
+    return new ApiResponse<IUser>(
+      HttpEnum.SUCCESS,
+      'Token válido',
+      AlertEnum.SUCCESS,
+      'Atención',
+      null
     )
   }
 }

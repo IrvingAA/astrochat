@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model, model } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
+import bcrypt from 'bcrypt'
 /**
  * User Interface
  * @interface IUser
@@ -32,6 +33,7 @@ export interface IUser extends Document {
   updatedAt: Date
   deletedAt?: Date | null
   fullName?: string
+  comparePassword(candidatePassword: string): Promise<boolean>
 }
 /**
  * User Schema
@@ -59,5 +61,11 @@ export const UserSchema = new Schema<IUser>(
 UserSchema.virtual('fullName').get(function (this: IUser) {
   return `${this.name} ${this.lastName}`.trim()
 })
+
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password)
+}
 
 export const UserModel: Model<IUser> = model<IUser>('User', UserSchema)

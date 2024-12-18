@@ -11,51 +11,61 @@ const chatRooms = [
   {
     name: 'General',
     description: 'Sala de chat general para todo tipo de temas.',
+    icon: 'mdi-chat',
     isActive: true
   },
   {
     name: 'Noticias',
     description: 'Sala de chat para compartir noticias de actualidad.',
+    icon: 'mdi-newspaper',
     isActive: true
   },
   {
     name: 'Deportes',
     description: 'Sala de chat para hablar sobre deportes.',
+    icon: 'mdi-soccer',
     isActive: true
   },
   {
     name: 'Espectáculos',
     description: 'Sala de chat para hablar sobre espectáculos.',
+    icon: 'mdi-star',
     isActive: true
   },
   {
     name: 'Tecnología',
     description: 'Sala de chat para hablar sobre tecnología.',
+    icon: 'mdi-cellphone',
     isActive: true
   },
   {
     name: 'Política',
     description: 'Sala de chat para hablar sobre política.',
+    icon: 'mdi-account-group',
     isActive: true
   },
   {
     name: 'Juegos',
     description: 'Sala de chat para hablar sobre videojuegos.',
+    icon: 'mdi-gamepad-variant',
     isActive: true
   },
   {
     name: 'Música',
     description: 'Sala de chat para hablar sobre música.',
+    icon: 'mdi-music',
     isActive: true
   },
   {
     name: 'Cine',
     description: 'Sala de chat para hablar sobre cine.',
+    icon: 'mdi-movie',
     isActive: true
   },
   {
     name: 'Libros',
     description: 'Sala de chat para hablar sobre libros.',
+    icon: 'mdi-book',
     isActive: true
   }
 ]

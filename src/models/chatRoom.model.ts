@@ -20,6 +20,7 @@ export interface IChatRoom extends Document {
   uuid: string
   name: string
   description?: string
+  icon?: string
   password?: string
   isActive: boolean
   createdBy?: string
@@ -32,6 +33,7 @@ export const ChatRoomSchema = new Schema<IChatRoom>(
   {
     uuid: { type: String, default: uuidv4, unique: true },
     name: { type: String, required: true, unique: true, trim: true },
+    icon: { type: String, default: 'mdi-pound' },
     description: { type: String, default: null },
     password: { type: String, default: null },
     isActive: { type: Boolean, default: true },
