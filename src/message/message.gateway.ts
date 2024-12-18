@@ -11,7 +11,6 @@ const pubSub = new PubSub()
 export class MessageGateway {
   @SubscribeMessage('newMessage')
   handleNewMessage(@MessageBody() message: string): void {
-    console.log('Received message:', message)
     pubSub.publish('messageAdded', { newMessage: message })
   }
 }

@@ -8,19 +8,46 @@
 
 ## Project setup
 
+### 1. Instalar dependencias
 ```bash
 $ npm install
 ```
 
+### 2. Configurar el entorno
+Copia el archivo `.env.example` a `.env`. Esto configuración las variables de entorno necesarias para el funcionamiento de la aplicación:
+
+```bash
+$ cp .env.example .env
+```
+
+> **Nota**: Asegúrate de editar las variables necesarias en el archivo `.env`, como las URIs de la base de datos y las llaves secretas.
+
+---
+
 ## Initialize the application
 
-To set up the application, including running database migrations and seeders:
+Una vez configurado el entorno, inicializa la base de datos, aplica migraciones y ejecuta los seeders:
 
 ```bash
 $ npm run app:init
 ```
 
-This command ensures the database schema is up to date and seeds any initial data required for the application.
+Este comando realiza lo siguiente:
+- Aplica migraciones a la base de datos.
+- Inserta datos iniciales (seeders), incluyendo usuarios predeterminados.
+
+---
+
+## Usuarios por defecto
+
+Después de ejecutar los seeders, puedes ingresar con las siguientes credenciales:
+
+| Usuario       | Contraseña         |
+|---------------|--------------------|
+| **john_doe**  | securePassword123  |
+| **jane_doe**  | securePassword123  |
+
+---
 
 ## Compile and run the project
 
@@ -34,19 +61,68 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
-## Uso de la Aplicación
 
-Después de inicializar el entorno y ejecutar la aplicación, podrás ver en la consola la URL en la que se está ejecutando la aplicación. Por defecto, será algo como:
+Una vez ejecutado, la consola mostrará la URL de la aplicación (por defecto: `http://localhost:3000`).
 
+---
 
+## Uso de la aplicación
 
-Accede a esta dirección para utilizar la API.
+### Documentación de la API
 
-### Endpoints disponibles
+Los endpoints disponibles y su documentación interactiva se encuentran en Swagger. Accede a la siguiente URL (ajustando el puerto si es necesario):
 
-Puedes consultar los endpoints disponibles y su documentación interactiva generada automáticamente desde Swagger. Para ello, abre en tu navegador el siguiente enlace (ajustando el puerto si es necesario):
+```
+http://localhost:3000/api-docs
+```
 
+---
 
+## Configuración de Insomnia para probar la API
 
-### API_DOC
-En la raíz encontrarás los endpoints disponibles
+### Variables de entorno en Insomnia
+
+Registra las siguientes variables de entorno en Insomnia para facilitar las peticiones:
+
+| Nombre       | Valor                                  |
+|--------------|----------------------------------------|
+| **base_url** | `http://localhost:3000/api`           |
+| **token**    | *(Token obtenido tras login exitoso)*  |
+| **base_ws**  | `ws://localhost:3000`                 |
+| **host**     | `http://localhost:3000`               |
+
+**Ejemplo de configuración en Insomnia**:
+
+1. Ve a **Manage Environments**.
+2. Añade las variables anteriores con sus respectivos valores.
+3. Guarda la configuración y realiza tus pruebas.
+
+---
+
+## Validación del funcionamiento
+
+1. **Login**: Realiza una petición `POST` a `base_url/auth/login` con las credenciales:
+   ```json
+   {
+     "username": "john_doe",
+     "password": "securePassword123"
+   }
+   ```
+   Obtendrás un token JWT.
+
+2. **Acceso protegido**: Prueba los endpoints protegidos usando el token obtenido en el encabezado:
+   ```
+   Authorization: Bearer <token>
+   ```
+
+---
+
+## Soporte
+
+Si encuentras algún problema durante la configuración, asegúrate de:
+- Verificar las variables de entorno en el archivo `.env`.
+- Confirmar que la base de datos está configurada correctamente y accesible.
+- Revisar la consola para identificar errores detallados.
+
+---
+

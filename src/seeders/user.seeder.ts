@@ -47,7 +47,8 @@ async function seedUsers() {
         profile: profiles[0]._id,
         name: 'John',
         lastName: 'Doe',
-        password: 'hashed_password_123',
+        password:
+          '$2b$10$Fccy9jA9CjMLtcLQHvGoN.CwZOACwXVmb5J8DLO0CzlB9GbJ3oPpe',
         avatar: 'https://example.com/avatar1.png',
         isActive: true
       },
@@ -57,7 +58,8 @@ async function seedUsers() {
         profile: profiles[1]._id,
         name: 'Jane',
         lastName: 'Doe',
-        password: 'hashed_password_456',
+        password:
+          '$2b$10$Fccy9jA9CjMLtcLQHvGoN.CwZOACwXVmb5J8DLO0CzlB9GbJ3oPpe',
         avatar: 'https://example.com/avatar2.png',
         isActive: true
       }

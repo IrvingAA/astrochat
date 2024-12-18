@@ -25,7 +25,6 @@ export class MessagesService {
    */
   async createMessage(dto: CreateMessageDto): Promise<ApiResponse<IMessage>> {
     const { chatRoomUuid, senderUuid, recipientUuid, content } = dto
-    console.log('DTO:', dto)
 
     try {
       const sender = await this.userModel.findOne({ uuid: senderUuid })
@@ -53,7 +52,6 @@ export class MessagesService {
           )
         }
       }
-      console.log('Recipient:', recipient)
 
       const newMessage = new this.messageModel({
         content,
@@ -61,7 +59,6 @@ export class MessagesService {
         recipientUuid: recipient ? recipient._id : null,
         chatRoomUuid
       })
-      console.log('New message:', newMessage)
 
       try {
         savedMessage = await newMessage.save()
@@ -103,7 +100,6 @@ export class MessagesService {
     try {
       const userUuid = '63530ec0-b4d0-4a4e-a6df-31c605c79af4'
 
-      // Obtener el usuario
       const user = await this.userModel.findOne({ uuid: userUuid })
       if (!user) {
         return new ApiResponse<any>(
@@ -118,36 +114,31 @@ export class MessagesService {
       const userId = user._id
       const skip = (page - 1) * limit
 
-      // Consulta para obtener todos los mensajes, públicos y privados, de la sala
       const allMessagesQuery = this.messageModel
         .find({
-          chatRoomUuid, // Filtramos por la sala de chat
-          deletedAt: null // Excluimos los mensajes eliminados
+          chatRoomUuid,
+          deletedAt: null
         })
         .skip(skip)
         .limit(limit)
-        .sort({ createdAt: -1 }) // Ordenamos por fecha, más recientes primero
-        .populate('senderUuid', 'uuid username name lastName fullName avatar') // Detalles del remitente
+        .sort({ createdAt: -1 })
+        .populate('senderUuid', 'uuid username name lastName fullName avatar')
         .populate(
           'recipientUuid',
           'uuid username name lastName fullName avatar'
-        ) // Detalles del destinatario (si aplica)
-        .select('uuid content senderUuid recipientUuid createdAt avatar') // Seleccionamos los campos necesarios
-        .lean() // Usamos lean() para obtener objetos planos
+        )
+        .select('uuid content senderUuid recipientUuid createdAt avatar')
+        .lean()
 
-      // Ejecutar la consulta para obtener todos los mensajes
       const allMessages = await allMessagesQuery
 
-      // Contamos el total de mensajes en la sala (sin distinción de público o privado)
       const totalMessages = await this.messageModel.countDocuments({
         chatRoomUuid,
-        deletedAt: null // Excluimos los mensajes eliminados
+        deletedAt: null
       })
 
-      // Cálculo de la paginación
-      const totalPages = Math.ceil(totalMessages / limit) // Total de páginas
+      const totalPages = Math.ceil(totalMessages / limit)
 
-      // Estructura paginada
       const paginatedMessages = {
         items: allMessages,
         pagination: {

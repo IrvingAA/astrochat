@@ -18,21 +18,17 @@ export class MessageResolver {
     @Args('page', { type: () => Number, defaultValue: 1 }) page: number,
     @Args('limit', { type: () => Number, defaultValue: 50 }) limit: number
   ): Promise<GraphQLMessagePagination> {
-    // Llamada al servicio para obtener los mensajes paginados
     const response = await this.messagesService.findByChatRoom(
       chatRoomUuid,
       page,
       limit
     )
 
-    // Extraer los mensajes de la respuesta
     const allMessages = response.data.items || []
 
-    // Cálculo de la paginación
     const totalItems = response.data.pagination.totalItems || 0
     const totalPages = Math.ceil(totalItems / limit)
 
-    // Devolver los mensajes junto con la paginación
     return {
       items: allMessages.map((message) => ({
         id: message._id?.toString() || '',
@@ -68,7 +64,6 @@ export class MessageResolver {
       senderUuid,
       recipientUuid: null
     })
-    console.log('savedMessage', savedMessage)
     if (!savedMessage) {
       throw new Error('Error guardando el mensaje')
     }
@@ -77,9 +72,7 @@ export class MessageResolver {
       createdBy: savedMessage.data.senderUuid?.toString(),
       createdAt: savedMessage.data.createdAt?.toISOString()
     }
-    console.log('Payload:', payload)
 
-    // Publica un string (JSON.stringify)
     pubSub.publish('messageAdded', { newMessage: JSON.stringify(payload) })
 
     return `Mensaje enviado: ${savedMessage.data.content}`

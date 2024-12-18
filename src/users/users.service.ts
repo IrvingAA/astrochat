@@ -28,14 +28,13 @@ export class UsersService {
    * @returns
    */
   async create(createUserDto: CreateUserDto): Promise<ApiResponse<IUser>> {
-    console.log('createUserDto', { createUserDto })
     try {
       const { email, username, password } = createUserDto
 
       const existingUser = await this.userModel.findOne({
         $or: [{ email }, { username }]
       })
-      console.log('existingUser', { existingUser })
+
       if (existingUser) {
         return new ApiResponse<IUser>(
           HttpEnum.CONFLICT,
@@ -56,7 +55,7 @@ export class UsersService {
         password: hashedPassword,
         profile: defaultProfile._id
       })
-      console.log('newUser', { newUser })
+
       const savedUser: IUser = await newUser.save()
       const populatedUser = await this.userModel
         .findById(savedUser._id)
