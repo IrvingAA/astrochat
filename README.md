@@ -70,10 +70,7 @@ Una vez ejecutado, la consola mostrará la URL de la aplicación (por defecto: `
 
 ### Documentación de la API
 
-Los endpoints disponibles y su documentación interactiva se encuentran en Swagger. Accede a la siguiente URL (ajustando el puerto si es necesario):
-
-```
-http://localhost:3000/api-docs
+Los endpoints disponibles se encuentran en el archivo api_doc, mismo que se deberá importar en Insomnia
 ```
 
 ---
