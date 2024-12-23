@@ -71,7 +71,6 @@ Una vez ejecutado, la consola mostrará la URL de la aplicación (por defecto: `
 ### Documentación de la API
 
 Los endpoints disponibles se encuentran en el archivo api_doc, mismo que se deberá importar en Insomnia
-```
 
 ---
 
